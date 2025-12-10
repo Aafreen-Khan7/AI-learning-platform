@@ -1,0 +1,21 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // User profile images - users can read/write their own images
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Quiz images/assets - read-only for authenticated users
+    match /quizzes/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only admins can upload quiz assets
+    }
+
+    // Public assets - read-only for all users
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // Only admins can upload public assets
+    }
+  }
+}
